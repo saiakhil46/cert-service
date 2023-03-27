@@ -76,15 +76,8 @@ public class CertificateGeneratorActor extends BaseActor {
             storageService = getStorageService();
             String uri = UrlManager.getContainerRelativePath((String) request.getRequest().get(JsonKey.PDF_URL));
             logger.info(request.getRequestContext(), "generateSignUrl:generate sign url method called for uri: {}", uri);
-            String cloudType = System.getenv(JsonKey.CLOUD_STORAGE_TYPE);
-            String signUrl = "";
-            if (JsonKey.GCP.equalsIgnoreCase(cloudType)) {
-                signUrl = storageService.getPutSignedURL(certVar.getCONTAINER_NAME(), uri, Some.apply(getTimeoutInSeconds()),
+            String signUrl = storageService.getSignedURLV2(certVar.getCONTAINER_NAME(), uri, Some.apply(getTimeoutInSeconds()),
                         Some.apply("r"),Some.apply("application/pdf"));
-            } else {
-                signUrl = storageService.getSignedURL(certVar.getCONTAINER_NAME(), uri, Some.apply(getTimeoutInSeconds()),
-                        Some.apply("r"));
-            }
             logger.info(request.getRequestContext(), "generateSignUrl:signedUrl got: {}",signUrl);
             Response response = new Response();
             response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
@@ -110,7 +103,7 @@ public class CertificateGeneratorActor extends BaseActor {
 
 
     private BaseStorageService getStorageService() {
-        StorageConfig storageConfig = new StorageConfig(certVar.getCloudStorageType(), certVar.getAzureStorageKey(), certVar.getAzureStorageSecret());
+        StorageConfig storageConfig = new StorageConfig(certVar.getCloudStorageType(), certVar.getCloudStorageKey(), certVar.getCloudStorageSecret());
         logger.info(null, "CertificateGeneratorActor:getStorageService:storage object formed: {}" ,storageConfig.toString());
         return StorageServiceFactory.getStorageService(storageConfig);
     }
@@ -238,14 +231,7 @@ public class CertificateGeneratorActor extends BaseActor {
     }
 
     private String getContainerName (StoreConfig storeParams) {
-        String type = storeParams.getType();
-        if (JsonKey.AZURE.equalsIgnoreCase(type)) {
-            return storeParams.getAzureStoreConfig().getContainerName();
-        } else if (JsonKey.AWS.equalsIgnoreCase(type)) {
-            return storeParams.getAwsStoreConfig().getContainerName();
-        } else {
-            return storeParams.getGcpStoreConfig().getContainerName();
-        }
+        return storeParams.getContainerName();
     }
 
     private Map<String, Object> uploadJson(String fileName, ICertStore certStore, String cloudPath) throws IOException {
@@ -291,6 +277,7 @@ public class CertificateGeneratorActor extends BaseActor {
         properties.put(JsonKey.SLUG, certVar.getSlug());
         properties.put(JsonKey.PREVIEW, certVar.getPreview(preview));
         properties.put(JsonKey.BASE_PATH, certVar.getBasePath());
+        properties.put(JsonKey.CLOUD_UPLOAD_RETRY_COUNT, certVar.getCLOUD_UPLOAD_RETRY_COUNT());
 
         logger.info(request.getRequestContext(), "getProperties:properties got from Constant File ".concat(Collections.singleton(properties.toString()) + ""));
         return properties;
