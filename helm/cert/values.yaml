@@ -26,8 +26,9 @@ ITEXT_LICENSE_ENABLED: "False"
 ITEXT_LICENSE_PATH: /home/sunbird/itext_trail_license.xml
 PUBLIC_CONTAINER_NAME: certqr
 download_link_expiry_timeout: "600"
-es_conn_info: elasticsearch.lern.svc.cluster.local:9200
-
+es_conn_info: elasticsearch.dev.svc.cluster.local:9200
+sunbird_cert_domain_url: ""
+sunbird_cert_enc_service_url: http://enc-service:801
 ## Variables with empty values
 ## The value for these variables will be contstucted using other variables
 ## If you provide a value to the variable, then that will take the highest precedence

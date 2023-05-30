@@ -45,8 +45,8 @@ data:
   PUBLIC_CONTAINER_NAME: {{ .Values.PUBLIC_CONTAINER_NAME }}
   download_link_expiry_timeout: {{ .Values.download_link_expiry_timeout | quote }}
   es_conn_info: {{ .Values.es_conn_info }}
-  sunbird_cert_domain_url: https://staging.sunbirded.org
-  sunbird_cert_enc_service_url: http://enc-service:8013
+  sunbird_cert_domain_url: https://{{ .Values.domain }}
+  sunbird_cert_enc_service_url: {{ .Values.sunbird_cert_enc_service_url }}
 
 ---
 apiVersion: v1
